@@ -4,7 +4,7 @@ use Parse::RecDescent;
 use Carp;
 use Fcntl qw /:flock/;
 use vars qw ($VERSION $grammar);
-$VERSION='1.181';
+$VERSION='1.182';
 
 BEGIN{ $::RD_AUTOACTION=q{ [@item[1..$#item]] }; }
 
@@ -102,7 +102,7 @@ sub add_section{
   my ($self,$section)=@_;
   croak"Missing arguments" if scalar @_ < 2;
   croak"Section exists!" if exists $self->{$section};
-  $self->{$section}="";  
+  $self->{$section}=undef;  
 }
 
 sub add_parameter{
