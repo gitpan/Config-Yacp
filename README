@@ -6,7 +6,8 @@ make test
 make install
 
 Dependencies
-
-This module uses the Test::More module, which is part of the 
-standard distribution if you are using Perl 5.7 or later
+============
+Test::More
+Parse::RecDescent
+Data::Dumper
 

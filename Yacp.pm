@@ -4,7 +4,7 @@ use Parse::RecDescent;
 use Carp;
 use Fcntl qw /:flock/;
 use vars qw ($VERSION $grammar);
-$VERSION='1.16';
+$VERSION='1.17';
 
 BEGIN{ $::RD_AUTOACTION=q{ [@item[1..$#item]] }; }
 
@@ -13,7 +13,7 @@ $grammar = q(
 	file:    section(s)
         section: header pair(s?)
 	header:  /\[(\w+)\]/ { $1 } 
-	pair:    /(\w+)\s?=\s?(\w+)(\s+[;#][\s\w]+)?\n/
+	pair:    /(\w+)\s?=\s?(\w+)?(\s+[;#][\s\w]+)?\n/
 	  {
 	    if(!defined $3){
 	      [$1,$2];
@@ -446,6 +446,7 @@ perl
 Parse::RecDescent
 Data::Dumper
 Fcntl
+Test::More
 
 =cut
 

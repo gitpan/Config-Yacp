@@ -25,3 +25,11 @@ Revision history for Perl extension Config::Yacp.
 	- Re-implemented all of the tests using the Test::More
 	  module
 
+1.17  Fri Nov 21 08:12:54 2003
+	- Changed the grammar slightly, so that if a particular
+	  key/value pair does not have the value defined, it will
+	  still correctly parse the ini file
+	    - This idea was inspired by the following node on
+	      PerlMonks: http://www.perlmonks.org/index.pl?node_id=308716
+	- Added additional tests to test other functions of the module.
+
