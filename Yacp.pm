@@ -4,7 +4,7 @@ use Parse::RecDescent;
 use Carp;
 use Fcntl qw /:flock/;
 use vars qw ($VERSION $grammar);
-$VERSION='1.18';
+$VERSION='1.181';
 
 BEGIN{ $::RD_AUTOACTION=q{ [@item[1..$#item]] }; }
 

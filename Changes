@@ -38,3 +38,6 @@ Revision history for Perl extension Config::Yacp.
 	  via Test::Pod. Added dependencies for both Test::Harness and
 	  Test::Pod
  
+1.181 Tue Feb  8 12:33:31 2005
+	- Fixed a small error within the 03add.t file
+
