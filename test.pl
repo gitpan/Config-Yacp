@@ -6,7 +6,7 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; print "1..13\n"; }
+BEGIN { $| = 1; print "1..16\n"; }
 END {print "not ok  1\n" unless $loaded;}
 use Config::Yacp;
 $loaded = 1;
@@ -28,7 +28,7 @@ if(defined $cfg1){
 }
 
 # Get the sections
-my @sections=$cfg1->get_sections();
+my @sections=$cfg1->get_sections;
 
 if(scalar @sections == 2){
   print"ok  3\n";
@@ -60,7 +60,7 @@ if($value eq "Value1"){
 # Create a new object & start testing the error
 # functions
 
-my $cfg2=Config::Yacp->new($file);
+my $cfg2=Config::Yacp->new($file,";");
 
 # Set a new value and check for it
 $cfg2->set_value("Section1","Parameter1","Value9");
@@ -125,5 +125,30 @@ if($@){
   print"not ok 13: $@\n";
 }else{
   print"ok 13\n";
+}
+
+# Verify the comment markers
+my $pound=$cfg1->get_marker;
+my $semi=$cfg2->get_marker;
+if($pound eq "#" and $semi eq ";"){
+  print"ok 14\n";
+}else{
+  print"not ok 14\n";
+}
+
+# Add a comment
+eval { $cfg1->add_comment("Section1","Parameter1","Comment 1"); };
+if($@){
+  print"not ok 15\n";
+}else{
+  print"ok 15\n";
+}
+
+# Delete a non-existent comment
+$cfg1->del_comment("Section2","Parameter3"); 
+if($@){
+  print"ok 16\n";
+}else{
+  print"not ok 16: $@\n";
 }
 
