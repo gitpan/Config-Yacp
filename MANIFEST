@@ -2,6 +2,11 @@ Changes
 MANIFEST
 Makefile.PL
 Yacp.pm
-test.pl
-config.ini
+t/config.ini
 README
+t/01load.t
+t/02getset.t
+t/03add.t
+t/04delete.t
+t/05newinit.t
+t/06pod.t

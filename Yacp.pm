@@ -4,7 +4,7 @@ use Parse::RecDescent;
 use Carp;
 use Fcntl qw /:flock/;
 use vars qw ($VERSION $grammar);
-$VERSION='1.17';
+$VERSION='1.18';
 
 BEGIN{ $::RD_AUTOACTION=q{ [@item[1..$#item]] }; }
 
@@ -64,6 +64,7 @@ sub get_parameters{
   my($self,$section)= @_;
   croak"No section given" if !defined $section;
   croak"Invalid section" if !exists $self->{$section};
+  carp"Can't Retrieve Internal Parameters" if $section=~/^(INI|CM)$/;
   my @parameters = sort keys %{$self->{$section}};
   return @parameters;
 }
@@ -83,9 +84,11 @@ sub get_comment{
   croak"Invalid section argument" if !exists $self->{$section};
   croak"Invalid parameter argument" if !exists $self->{$section}->{$parameter};
   if (!defined $self->{$section}->{$parameter}->[1]){
+    local $SIG{__WARN__}=sub{ $@=shift; };
     carp"No comment available for this parameter";
   }else{
     my $comment=$self->{$section}->{$parameter}->[1];
+ 
     return $comment;
   }
 }
@@ -130,13 +133,14 @@ sub add_comment{
 sub del_section{
   my ($self,$section)=@_;
   croak"Missing arguments" if scalar @_ < 2;
-  croak"Internal variable can't be deleted" if $section=~/^INI|CM$/i;
+  croak"Internal Parameter Can't Be Deleted" if $section=~/^INI|CM$/i;
   croak"Non-Existent section" if !exists $self->{$section};
   delete $self->{$section};
 }
 
 sub del_parameter{
   my ($self,$section,$para)=@_;
+  croak"Internal variable can't be deleted" if $section=~/^INI|CM$/i;
   croak"Missing arguments" if scalar @_ < 3;
   croak"Non-Existent section" if !exists $self->{$section};
   croak"Non-Existent parameter" if !exists $self->{$section}->{$para};
@@ -145,6 +149,7 @@ sub del_parameter{
 
 sub del_comment{
   my ($self,$section,$para)=@_;
+  carp"Internal variable does not have comments to delete" if $section=~/^INI|CM$/i;
   croak"Missing arguments" if scalar @_ < 3;
   croak"Non-Existent section" if !exists $self->{$section};
   croak"Non-Existent parameter" if !exists $self->{$section}->{$para};
@@ -158,15 +163,15 @@ sub del_comment{
  
 sub set_value{
   my ($self,$section,$para,$value)=@_;
-  croak"Missing arguments" if scalar @_ < 4;
+  croak"Can't Change Internal Parameter" if $section=~/^(INI|CM)$/;
   croak"Non-Existent section" if !exists $self->{$section};
   croak"Non-Existent parameter" if !exists $self->{$section}->{$para};
-  croak"Can't Change Internal Parameter" if $section=~/CM|INI/;
   $self->{$section}->{$para}->[0]=$value;
 }
 
 sub set_comment{
   my ($self,$section,$para,$comment)=@_;
+  croak"Cannot set comments for internal parameters" if $section=~/^INI|CM$/i;
   croak"Missing arguments" if scalar @_ < 4; 
   croak"Non-Existent section" if !exists $self->{$section};
   croak"Non-Existent parameter" if !exists $self->{$section}->{$para};
@@ -237,7 +242,6 @@ Config::Yacp - Yet Another Configuration file Parser
 =head1 SYNOPSIS 
 
 use Config::Yacp;
-
 my $cfg=Config::Yacp->new("config.ini",";");
 
 # Get the names of the sections
@@ -364,7 +368,7 @@ C<< $cfg->set_comment("Section3","key5","This is a comment"); >>
 This method will change the comment that is contained in the parameter that
 is passed to it. If the comment doesn't exist for that parameter, it will
 call the add_comment method, otherwise it will write over the comment.
- 
+
 =item del_parameter
 
 C<< $cfg->del_parameter("Section3","key5"); >>
@@ -444,8 +448,11 @@ itself.
 perl
 
 Parse::RecDescent
+
 Data::Dumper
+
 Fcntl
+
 Test::More
 
 =cut

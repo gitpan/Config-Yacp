@@ -7,6 +7,8 @@ WriteMakefile(
     'PREREQ_PM'		=> {Parse::RecDescent => 0,
 			    Carp => 0,
 			    Test::More => 0,
+			    Test::Harness => 0,
+			    Test::Pod => 0,
 			    Data::Dumper => 0,
 			    Fcntl => 0}, # e.g., Module::Name => 1.1
 );

@@ -33,3 +33,8 @@ Revision history for Perl extension Config::Yacp.
 	      PerlMonks: http://www.perlmonks.org/index.pl?node_id=308716
 	- Added additional tests to test other functions of the module.
 
+1.18  Mon Jan 10 14:09:35 2005
+	- Converted the tests to Test::Harness and added testing of the POD
+	  via Test::Pod. Added dependencies for both Test::Harness and
+	  Test::Pod
+ 
