@@ -1,10 +1,11 @@
 package Config::Yacp;
 use strict;
 use Parse::RecDescent;
-use vars qw ($VERSION $grammar);
 use Carp;
+use Fcntl qw /:flock/;
+use vars qw ($VERSION $grammar);
 
-$VERSION='1.00';
+$VERSION='1.1';
 
 $grammar = q(
 	file: section(s)
@@ -15,7 +16,7 @@ $grammar = q(
 	    }
 	    \%file;
 	  }
-	section: header assign(s)
+	section: header assign(s?)
 	  {
 	    my %sec;
 	    foreach(@{$item[2]}){
@@ -35,18 +36,23 @@ sub new{
   {
     $/ = undef;
     open(FILE,"$file")||croak"Can't open $file: $!";
+    flock(FILE,LOCK_SH) or die"Unable to obtain a file lock: $!\n";
     $ini = <FILE>;
+    flock(FILE,LOCK_UN);
     close FILE; 
   }
 
   bless my $tree = $parser->file($ini);
+  $$tree{INI}=$file;
   return $tree;
 }
 
 sub get_sections{
   my $self=shift;
+  my @returned;
   my @sections = sort keys %$self;
-  return @sections;
+  foreach(@sections){ push @returned,$_ unless $_ eq "INI"; }
+  return @returned;
 }
 
 sub get_parameters{
@@ -66,9 +72,65 @@ sub get_value{
   return $value;
 }
 
-sub write{
+sub add_section{
+  my ($self,$section)=@_;
+  croak"Missing arguments" if scalar @_ < 2;
+  croak"Section exists!" if exists $$self{$section};
+  $$self{$section}="";  
+}
+
+sub add_parameter{
+  my ($self,$section,$para,$value)=@_;
+  croak"Missing arguments" if scalar @_ < 4;
+  croak"Can't add to internal parameter" if $section=~/^INI$/i;
+  croak"Non-Existent section" if !exists $$self{$section};
+  croak"Parameter exists" if exists $$self{$section}{$para};
+  $$self{$section}{$para}=$value; 
+}
+
+sub del_section{
+  my ($self,$section)=@_;
+  croak"Missing arguments" if scalar @_ < 2;
+  croak"Internal variable can't be deleted" if $section eq "INI";
+  croak"Non-Existent section" if !exists $$self{$section};
+  delete $$self{$section};
+}
+
+sub del_parameter{
+  my ($self,$section,$para)=@_;
+  croak"Missing arguments" if scalar @_ < 3;
+  croak"Non-Existent section" if !exists $$self{$section};
+  croak"Non-Existent parameter" if !exists $$self{$section}{$para};
+  delete $$self{$section}{$para};
+}
+
+sub set_value{
+  my ($self,$section,$para,$value)=@_;
+  croak"Non-Existent section" if !exists $$self{$section};
+  croak"Non-Existent parameter" if !exists $$self{$section}{$para};
+  $$self{$section}{$para}=$value;
+}
+
+sub get_ini{
   my $self=shift;
-  croak"This function is not yet implemented.";
+  return $$self{INI};
+}
+
+sub save_ini{
+  my $self=shift;
+  my $file=$self->get_ini;
+  open FH,">$file"||die"Unable to open $file: $!\n";
+  flock(FH,LOCK_EX) or die "Unable to obtain file lock: $!\n";
+  foreach my $section(sort keys %{$self}){
+    print FH "[$section]\n" unless $section eq "INI";
+    foreach my $para(sort keys %{$$self{$section}}){
+      print FH "$para = $$self{$section}{$para}\n";
+    }
+    print FH "\n" unless $section eq "INI";
+  }
+  flock(FH,LOCK_UN);
+  close FH;
+  $self=$self->new($file);
 }
 
 sub dmp{
@@ -98,6 +160,24 @@ my @params = $cfg->get_parameters("Section1");
 # Get the value of a specific parameter within a section
 my $value = $cfg->get_value("Section1","Parameter1");
 
+# Add a section
+$cfg->add_section("Section3");
+
+# Add a parameter and value to a section
+$cfg->add_parameter("Section3","Key5","Value5");
+
+# Change the value of a parameter within a section
+$cfg->set_value("Section3","Key5","Value99");
+
+# Delete a parameter and value in a section
+$cfg->del_parameter("Section1","key1");
+
+# Delete an entire section
+$cfg->del_section("Section2");
+
+# Save the changes to the .ini file
+$cfg->save_ini;
+
 =head1 DESCRIPTION
 
 =over 5
@@ -125,6 +205,42 @@ This method retrieves the parameter names for a given section and returns them i
 C<< my $value = $cfg->get_value("Section1","Parameter1"); >>
 
 This method retrieves the value of the section and parameter that are passed to it. It will croak if either the section name or parameter name does not exist, or if there aren't enough arguments passed to it.
+
+=item add_section
+
+C<< $cfg->add_section("Section3"); >>
+
+This method will add a section into the object, but will not exist in the .ini file until the save_ini method is called. This method will croak if the section being added already exists within the object.
+
+=item add_parameter
+
+C<< $cfg->add_parameter("Section3","key5","value5"); >>
+
+This method will add a parameter and value to a specific section within the object. The parameter will exist only within the object until the save_ini method is called. This method will croak if it is passed an invalid section name, or the parameter exists within the section.
+
+=item set_value
+
+C<< $cfg->set_value("Section3","key5","value9"); >>
+
+This method will change the value of the specified section/parameter within the object, and will write the change to the .ini file upon callinig the save_ini method. This method will croak if either the section or parameter name does not exist.
+
+=item del_parameter
+
+C<< $cfg->del_parameter("Section3","key5"); >>
+
+This method will delete the specified parameter within a section. The change will occur within the object and is written out to the .ini file upon calling the save_ini method. This method will croak if either the section or parameter name is non-existent.
+
+=item del_section
+
+C<< $cfg->del_section("Section3"); >>
+
+This method will delete the specified section inside the object. It will also remove any parameters that were under that section heading. This method will croak if the section does not exist.
+
+=item save_ini
+
+C<< $cfg->save_ini; >>
+
+This method will save the parameters that have been changed inside the object back to the .ini file that was specified when the object was created. It will then re-read the .ini file and return an updated reference.
 
 =back
 

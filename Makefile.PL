@@ -6,5 +6,6 @@ WriteMakefile(
     'VERSION_FROM'	=> 'Yacp.pm', # finds $VERSION
     'PREREQ_PM'		=> {Parse::RecDescent => 0,
 			    Carp => 0,
-			    Data::Dumper => 0}, # e.g., Module::Name => 1.1
+			    Data::Dumper => 0,
+			    Fcntl => 0}, # e.g., Module::Name => 1.1
 );

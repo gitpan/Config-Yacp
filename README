@@ -5,8 +5,3 @@ make
 make test
 make install
 
-To Do List
-==========
-- Implement a write function to allow for sections and parameters
-  to be added to an ini file.
-
