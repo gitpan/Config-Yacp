@@ -1,0 +1,6 @@
+Revision history for Perl extension Config::Yacp.
+
+1.00  Fri Mar 21 15:42:50 2003
+	- original version; created by h2xs 1.20 with options
+		-AXn Config::Yacp
+
