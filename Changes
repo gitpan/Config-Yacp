@@ -21,23 +21,7 @@ Revision history for Perl extension Config::Yacp.
 	- Discovered a small bug within the save_ini function and
 	  corrected it.
 
-1.15  Tue Jun  3 12:14:44 2003
-	- The .ini file can now include arguments with the parameters
-	  as long as the comments start with either a semi-colon (;)
-	  or a pound sign (#)
-		- Rewrote the grammar for P::RD to correctly parse
-		  the .ini file
-		- Added the deparse function to change the output of
-		  P::RD from an AoAoA to a HoHoA
-
-	- Added the following functions:
-		- add_comment
-		- set_comment
-		- get_marker
-		- del_comment
-
-	- Changed the other functions to work with the new
-	  data structure
-
-	- Wrote additional tests for the new functions
+1.16  Wed Oct 29 12:20:52 2003
+	- Re-implemented all of the tests using the Test::More
+	  module
 

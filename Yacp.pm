@@ -4,7 +4,7 @@ use Parse::RecDescent;
 use Carp;
 use Fcntl qw /:flock/;
 use vars qw ($VERSION $grammar);
-$VERSION='1.15';
+$VERSION='1.16';
 
 BEGIN{ $::RD_AUTOACTION=q{ [@item[1..$#item]] }; }
 
@@ -161,6 +161,7 @@ sub set_value{
   croak"Missing arguments" if scalar @_ < 4;
   croak"Non-Existent section" if !exists $self->{$section};
   croak"Non-Existent parameter" if !exists $self->{$section}->{$para};
+  croak"Can't Change Internal Parameter" if $section=~/CM|INI/;
   $self->{$section}->{$para}->[0]=$value;
 }
 

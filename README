@@ -5,6 +5,8 @@ make
 make test
 make install
 
-For an example of the configuration file, see the config.ini file in
-the same directory as this file.
+Dependencies
+
+This module uses the Test::More module, which is part of the 
+standard distribution if you are using Perl 5.7 or later
 
