@@ -45,3 +45,11 @@ Revision history for Perl extension Config::Yacp.
 	- Fixed an error in the add_section subfunction that was causing
 	  test 03add.t to fail after two tests.
 
+2.0   Sun Jul  1 09:51:48 2007
+        - Now uses the Object::InsideOut module
+	- Added some additional tests
+	- Changed the names of the module functions to keep them
+	  separate from the ones created by Object::InsideOut
+	    - The old 'get_' methods are now 'retrieve_'
+	    - The old 'del_' methods are now 'delete_'
+
